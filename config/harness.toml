@@ -10,9 +10,11 @@
 # ==================================================================================
 [model]
 name = ""
-# auto | anthropic | openai | gemini | groq | deepseek | openai_compatible
+# auto | anthropic | openai | gemini | groq | deepseek | openrouter | qwen | openai_compatible
 # For Groq GPT-OSS 120B: AI_PROVIDER=groq AI_MODEL=openai/gpt-oss-120b make run
 # For DeepSeek Flash: AI_PROVIDER=deepseek AI_MODEL=deepseek-flash make run
+# For OpenRouter DeepSeek: AI_PROVIDER=openrouter AI_MODEL=deepseek/deepseek-v4.1-flash make run
+# For Qwen Model Studio: AI_PROVIDER=qwen AI_MODEL=<model-id> AI_BASE_URL=<key-region-endpoint> make run
 # Use the exact organizer model ID once announced; AI_API_KEY remains only in the environment.
 provider = "auto"
 # Optional custom endpoint (OpenAI-compatible gateways, proxies). Empty = provider default.

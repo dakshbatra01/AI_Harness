@@ -17,7 +17,7 @@ DEFAULT_CONFIG_PATH = HARNESS_ROOT / "config" / "harness.toml"
 
 DEFAULTS: dict = {
     "model": {
-        "provider": "auto",  # auto | anthropic | openai | gemini | groq | deepseek | openai_compatible
+        "provider": "auto",  # auto | anthropic | openai | gemini | groq | deepseek | openrouter | qwen | openai_compatible
         "name": "",  # prescribed model id (AI_MODEL overrides)
         "base_url": "",  # AI_BASE_URL overrides
         "temperature": 0.0,

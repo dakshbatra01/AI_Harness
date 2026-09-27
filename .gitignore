@@ -9,3 +9,4 @@ __pycache__/
 .venv/
 .harness_scratch/
 .DS_Store
+evaluator-rehearsal/

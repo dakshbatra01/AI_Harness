@@ -139,6 +139,31 @@ class OpenAIHTTPTests(unittest.TestCase):
         self.assertEqual(detect_provider({"name": "deepseek-flash"}, "sk-x"), "deepseek")
         self.assertEqual(detect_provider({"name": "x", "base_url": "https://api.deepseek.com"}, "sk-x"), "deepseek")
 
+    def test_openrouter_reasoning_details_are_replayed(self):
+        first = oai_msg(tool_calls=[{"id": "c1", "type": "function", "function": {"name": "read_file", "arguments": '{"path": "README.md"}'}}])
+        details = [{"type": "reasoning.text", "text": "checking the repository"}]
+        first["choices"][0]["message"]["reasoning_details"] = details
+        self.mock.script = [(200, first), (200, oai_msg(content="done"))]
+        p = OpenAICompatProvider("deepseek/deepseek-v4.1-flash", {"base_url": self.base}, "K", flavor="openrouter")
+        schema = [{"name": "read_file", "description": "read", "parameters": {"type": "object", "properties": {}}}]
+        turn = p.chat("system", [{"role": "user", "content": "inspect"}], schema)
+        self.assertEqual(turn.raw, {"reasoning_details": details})
+        p.chat("system", [{"role": "assistant", "content": turn.text, "_raw": turn.raw,
+                           "tool_calls": [c.to_dict() for c in turn.tool_calls]},
+                          {"role": "tool", "tool_call_id": "c1", "content": "README"}], schema)
+        assistant = [m for m in self.mock.requests[1]["messages"] if m["role"] == "assistant"][0]
+        self.assertEqual(assistant["reasoning_details"], details)
+
+    def test_qwen_key_uses_configured_compatible_endpoint(self):
+        from unittest.mock import patch
+
+        self.mock.script = [(200, oai_msg(content="ok"))]
+        with patch.dict(os.environ, {"AI_API_KEY": "sk-local-qwen-key"}):
+            provider = build_provider({"provider": "qwen", "name": "qwen-plus", "base_url": self.base})
+        self.assertEqual(provider.chat("system", [{"role": "user", "content": "hello"}], None).text, "ok")
+        self.assertEqual(self.mock.requests[0]["model"], "qwen-plus")
+        self.assertEqual(self.mock.headers[0]["authorization"], "Bearer sk-local-qwen-key")
+
     def test_malformed_arguments_reported(self):
         self.mock.script = [(200, oai_msg(tool_calls=[{"id": "c1", "type": "function", "function": {"name": "x", "arguments": "{bad"}}]))]
         p = OpenAICompatProvider("m", {"base_url": self.base}, "K", flavor="openai_compatible")

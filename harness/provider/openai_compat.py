@@ -18,6 +18,7 @@ DEFAULT_BASES = {
     "gemini": "https://generativelanguage.googleapis.com/v1beta/openai",
     "groq": "https://api.groq.com/openai/v1",
     "deepseek": "https://api.deepseek.com",
+    "openrouter": "https://openrouter.ai/api/v1",
 }
 
 
@@ -123,6 +124,8 @@ class OpenAICompatProvider(Provider):
                 raw = m.get("_raw")
                 if isinstance(raw, dict) and raw.get("reasoning_content"):
                     msg["reasoning_content"] = raw["reasoning_content"]
+                if isinstance(raw, dict) and raw.get("reasoning_details"):
+                    msg["reasoning_details"] = raw["reasoning_details"]
                 if m.get("tool_calls"):
                     msg["tool_calls"] = [
                         {
@@ -235,8 +238,7 @@ class OpenAICompatProvider(Provider):
         turn.cached_tokens = int(details.get("cached_tokens", 0) or usage.get("prompt_cache_hit_tokens", 0) or 0)
         # Thinking models (e.g. DeepSeek) return their reasoning separately; with tools, the API requires it to be
         # sent back on later turns (otherwise HTTP 400). Keep it with the turn so history can replay it verbatim.
-        if msg.get("reasoning_content"):
-            turn.raw = {"reasoning_content": msg["reasoning_content"]}
+        turn.raw = {key: msg[key] for key in ("reasoning_content", "reasoning_details") if msg.get(key)} or None
         self._account(turn.input_tokens + int(payload.get("max_tokens") or payload.get("max_completion_tokens") or 0),
                       meta.get("headers"))
         turn.stop_reason = choices[0].get("finish_reason") or ""

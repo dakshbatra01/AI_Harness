@@ -54,7 +54,7 @@ Only the Python standard library (3.9+) and `git` are needed, so `make setup` ca
 
 ## Model configuration
 
-The model is defined in the **MODEL CONFIGURATION** block of `config/harness.toml`: `[model].name`, or `AI_MODEL` to override it. When the name is empty, the detected provider's default is used with a warning. Set the exact organizer model ID once announced. The effective model is printed at startup and recorded in every `result.json`.
+The model is defined in the **MODEL CONFIGURATION** block of `config/harness.toml`: `[model].name`, or `AI_MODEL` to override it. Some providers have a default; OpenRouter and Qwen require an explicit model ID. Set the exact evaluator model ID. The effective model is printed at startup and recorded in every `result.json`.
 
 For local Groq GPT-OSS 120B testing, export your Groq key as `AI_API_KEY` and run:
 
@@ -62,12 +62,27 @@ For local Groq GPT-OSS 120B testing, export your Groq key as `AI_API_KEY` and ru
 AI_PROVIDER=groq AI_MODEL=openai/gpt-oss-120b make run
 ```
 
-For an organizer run on DeepSeek Flash, use `AI_PROVIDER=deepseek AI_MODEL=deepseek-flash make run` if those are the exact endpoint and model they specify. Both use the existing text-only HTTP adapter; neither needs another package. No live provider run has been completed without an API key.
+With an OpenRouter key, use OpenRouter's model ID for DeepSeek:
+
+```bash
+AI_PROVIDER=openrouter AI_MODEL=deepseek/deepseek-v4.1-flash make run REPO=/path/to/repo ISSUE_FILE=/path/to/issue.md ARGS=--headless
+```
+
+With a direct DeepSeek key, use `AI_PROVIDER=deepseek AI_MODEL=deepseek-flash`. OpenRouter's `sk-or-v1-` key is detected automatically, but a direct DeepSeek key needs the provider or model configured. A list of credentials is supported only when every endpoint serves the **same** selected model ID; it does not switch models between calls.
+
+For an Alibaba Model Studio Qwen key, provide the model ID and the OpenAI-compatible base URL for the key's region (example for Singapore):
+
+```bash
+AI_PROVIDER=qwen AI_MODEL=qwen-plus AI_BASE_URL=https://dashscope-intl.aliyuncs.com/compatible-mode/v1 make run REPO=/path/to/repo ISSUE_FILE=/path/to/issue.md ARGS=--headless
+```
+
+Qwen keys have no reliable provider or region prefix, so a key alone cannot select its endpoint. `AI_MODEL` and `AI_BASE_URL` keep the harness usable with whichever Qwen model and region the evaluator supplies. Keep the credential only in `AI_API_KEY`.
 
 Providers (all over raw HTTP):
 - Anthropic Messages
 - OpenAI Chat Completions
 - Gemini
+- DeepSeek, OpenRouter, and Qwen Model Studio
 - any OpenAI-compatible endpoint
 
 The harness uses native tool calling and falls back automatically to a plain-text tool protocol that works with any model. Decoding is deterministic where the model allows it (`temperature=0`, fixed `seed`). Parameters a model rejects are dropped automatically.
