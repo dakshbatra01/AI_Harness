@@ -1,0 +1,10 @@
+[
+  {
+    "id": "fixture-durations",
+    "repo": "fixture:durations",
+    "hidden_tests": {
+      "tests/test_hidden.py": "import unittest\nfrom durations import parse_duration\n\nclass T(unittest.TestCase):\n    def test_compound(self):\n        self.assertEqual(parse_duration('1h30m'), 5400)\n        self.assertEqual(parse_duration('1h 2m 3s'), 3723)\n\nif __name__ == '__main__':\n    unittest.main()\n"
+    },
+    "grade_command": "python3 -m unittest tests.test_hidden"
+  }
+]

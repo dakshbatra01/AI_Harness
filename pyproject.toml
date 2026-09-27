@@ -1,0 +1,9 @@
+[project]
+name = "evidence-gated-harness"
+version = "1.0.0"
+description = "Model-portable, evidence-gated software-engineering harness (Adaptive Evidence-Gated Controller)"
+requires-python = ">=3.9"
+dependencies = []  # standard library only: nothing to install, nothing to break offline
+
+[project.scripts]
+harness = "harness.cli:main"

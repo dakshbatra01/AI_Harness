@@ -1,0 +1,76 @@
+[
+ {
+  "id": "E1",
+  "level": "easy",
+  "kind": "wrong behaviour",
+  "project": "invoicekit",
+  "hidden": "E1_invoice_discount_tax.py",
+  "issue": "Invoice total is wrong when an invoice has both a discount and tax\n\nOne item at 100.00, a discount of 10.00 and a 20% tax rate gives a total of 110.00. Our accountant says it should be 108.00: the discount is taken off before tax is charged (that is also what the module docstring says).\n\n```python\nfrom decimal import Decimal\nfrom invoicekit import Invoice, compute_total\ninv = Invoice(discount=Decimal('10.00'), tax_rate=Decimal('0.20')).add('chair', '100.00')\nprint(compute_total(inv))  # 110.00, expected 108.00\n```",
+  "tests": []
+ },
+ {
+  "id": "E2",
+  "level": "easy",
+  "kind": "feature",
+  "project": "textstats",
+  "hidden": "E2_textstats_json.py",
+  "issue": "Feature request: JSON output for the CLI\n\nPlease add a `--json` flag to the `textstats` command line (`textstats/cli.py`). With `--json` it should print the report as a single JSON object with the keys `words`, `unique`, `avg_length` and `top` (a list of `[word, count]` pairs, honouring `--top`), so scripts can consume it. Without the flag the current human-readable output must stay exactly as it is.",
+  "tests": []
+ },
+ {
+  "id": "E3",
+  "level": "easy",
+  "kind": "wrong behaviour (crash)",
+  "project": "textstats",
+  "hidden": "E3_textstats_empty.py",
+  "issue": "textstats crashes on an empty file\n\n```\n$ python -m textstats empty.txt\nTraceback (most recent call last):\n  File \"textstats/cli.py\", line 37, in main\n    print(render_text(build_report(text, args.top)))\n  File \"textstats/cli.py\", line 10, in build_report\n    \"avg_length\": core.average_word_length(text),\n  File \"textstats/core.py\", line 21, in average_word_length\n    return round(sum(len(w) for w in ws) / len(ws), 2)\nZeroDivisionError: division by zero\n```\nThe same happens for files that contain only whitespace or punctuation. Expected: a normal report with 0 words and an average length of 0.0.",
+  "tests": []
+ },
+ {
+  "id": "E4",
+  "level": "easy",
+  "kind": "test case only (no issue text)",
+  "project": "slugkit",
+  "hidden": "E4_slug_separators.py",
+  "issue": "",
+  "tests": [
+   "tests/test_slug.py::test_collapses_separators"
+  ]
+ },
+ {
+  "id": "M1",
+  "level": "medium",
+  "kind": "feature (multi-file)",
+  "project": "inventory",
+  "hidden": "M1_inventory_reservations.py",
+  "issue": "Feature: reserve stock for pending orders\n\nWe need to hold stock for orders that have not shipped yet.\n\n- `Inventory.reserve(sku, qty)` holds `qty` units. Only available stock (on hand minus what is already reserved) can be reserved; otherwise raise `InsufficientStock`.\n- `Inventory.release(sku, qty)` gives reserved units back. Releasing more than is reserved is a `ValueError`.\n- Every `Item` should expose `reserved` (starts at 0) and `available` (= on_hand - reserved).\n- `ship()` must not ship units that are reserved for someone else: it may only take available stock.\n- The TOTAL line of `report.summary()` should also show `reserved=` and `available=` next to `on_hand=`.",
+  "tests": []
+ },
+ {
+  "id": "M2",
+  "level": "medium",
+  "kind": "wrong behaviour (silent data bug)",
+  "project": "inventory",
+  "hidden": "M2_inventory_thousands.py",
+  "issue": "Imported stock quantities are wrong for large numbers\n\nOur ERP exports quantities with thousands separators, e.g. `\"1,200\"` (quoted in the CSV). After `load_csv`, that item shows 1 unit on hand instead of 1200, and the summary totals are way off. Small numbers like `40` import fine. No error is raised, so we only noticed from the totals.",
+  "tests": []
+ },
+ {
+  "id": "H1",
+  "level": "hard",
+  "kind": "wrong behaviour (cross-module)",
+  "project": "taskflow",
+  "hidden": "H1_taskflow_alias_deps.py",
+  "issue": "Tasks run before their dependencies when the dependency is referenced by an alias\n\n`deploy` depends on `compile`, which is an alias of `build`:\n\n```json\n{\"tasks\": [\n  {\"name\": \"deploy\", \"action\": \"echo\", \"args\": {\"message\": \"shipped\"}, \"deps\": [\"compile\"]},\n  {\"name\": \"build\", \"action\": \"echo\", \"args\": {\"message\": \"built\"}, \"aliases\": [\"compile\"]}\n]}\n```\n\n`python -m taskflow run pipeline.json` runs `deploy` first and prints a warning that dependency 'compile' is unknown. If `deploy` lists `build` instead, the order is correct. The README says a dependency may use a task's name or any of its aliases. If `build` fails, `deploy` should be skipped, but currently it runs anyway.",
+  "tests": []
+ },
+ {
+  "id": "H2",
+  "level": "hard",
+  "kind": "feature (cross-cutting)",
+  "project": "taskflow",
+  "hidden": "H2_taskflow_retries.py",
+  "issue": "Feature: retry flaky tasks\n\nAdd an optional `retries` field to task definitions: a non-negative integer, default 0. When a task's action raises, run it again, up to `retries` extra times; the task succeeds if any attempt succeeds, and its dependents are skipped only if it still failed after all retries.\n\n- Invalid `retries` values (negative numbers, non-integers, booleans) must be rejected with `ConfigError` when the pipeline is loaded.\n- Each `TaskResult` records how many attempts were made in an `attempts` field.\n- The text report shows the number of attempts for tasks that needed more than one, e.g. `[+] fetch (attempts: 3)`; the JSON output includes `attempts` for every task.",
+  "tests": []
+ }
+]

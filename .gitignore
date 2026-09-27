@@ -1,0 +1,11 @@
+runs/
+workspaces/
+eval/runs/
+eval/benchmark/results/
+.cache/
+__pycache__/
+*.pyc
+.env
+.venv/
+.harness_scratch/
+.DS_Store
