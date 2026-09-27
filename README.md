@@ -15,7 +15,7 @@ make setup                     # checks the toolchain; standard library only, no
 make run                       # opens the terminal dashboard when run interactively
 ```
 
-`make run` opens the full-screen dashboard in an interactive terminal. Press **W** for a workspace path or git URL, **I** for an issue URL, file path, or pasted text (finish with a line containing only `.`), **T** for optional failing test IDs or commands, then **R** to run. The dashboard shows progress and the evidence verdict. Press **D** to inspect the patch and **Q** to quit when idle.
+`make run` opens the full-screen dashboard in an interactive terminal. Use **Tab** (or **Shift-Tab**) to select Workspace, Issue, Target tests, or Run, then **Enter** to edit or start. The direct shortcuts **W**, **I**, **T**, and **R** still work. In the multiline issue editor, paste issue text, a file path, or a GitHub issue URL; press **F2** or **Ctrl-G** to save, **Esc** to cancel, or enter a line containing only `.` to finish. The dashboard shows live progress, elapsed time, model calls, tokens, and the verdict. **Up/Down** and **PgUp/PgDn** scroll activity; **End** returns to live updates. After a run, **D** opens the patch and **V** opens the evidence report. Press **?** for keyboard help and **Q** to quit when idle.
 
 The line-oriented session remains available with `make run ARGS=--plain`. It asks for three things:
 
