@@ -4,6 +4,7 @@
 SHELL := /bin/bash
 PY ?= $(shell command -v python3 2>/dev/null || command -v python 2>/dev/null)
 export PYTHONDONTWRITEBYTECODE := 1
+export PYTHONPATH := $(CURDIR)/source-code$(if $(PYTHONPATH),:$(PYTHONPATH))
 
 help:
 	@echo "make setup                         verify toolchain (stdlib-only: nothing to install)"
@@ -11,7 +12,7 @@ help:
 	@echo "make tui                           full-screen terminal dashboard directly"
 	@echo "make run REPO=path ISSUE_FILE=f    headless (also ISSUE='text', ISSUE_URL=..., TESTS='id1,id2', stdin, ARGS='...')"
 	@echo "make test                          unit + offline end-to-end tests (no API key needed)"
-	@echo "make eval TASKS=eval/tasks.json    run the harness over a task set and grade it"
+	@echo "make eval TASKS=/path/tasks.json  optional local evaluation with a supplied task set"
 
 setup:
 	@test -n "$(PY)" || (echo "python3 (>=3.9) is required" && exit 1)
@@ -36,7 +37,8 @@ smoke:
 	@$(PY) -m harness smoke
 
 eval:
-	@$(PY) -m harness.eval --tasks $(or $(TASKS),eval/tasks.json) $(ARGS)
+	@test -n "$(TASKS)" || (echo "Set TASKS=/path/to/tasks.json for the optional local evaluation" && exit 1)
+	@$(PY) -m harness.eval --tasks $(TASKS) $(ARGS)
 
 clean:
 	rm -rf runs/ workspaces/ .cache/

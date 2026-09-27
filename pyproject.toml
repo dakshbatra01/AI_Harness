@@ -1,3 +1,7 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "evidence-gated-harness"
 version = "1.0.0"
@@ -7,3 +11,6 @@ dependencies = []  # standard library only: nothing to install, nothing to break
 
 [project.scripts]
 harness = "harness.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["source-code"]

@@ -47,14 +47,14 @@ Piped input and explicit issue flags still run headlessly through `make run`. `m
 
 ```bash
 make test    # unit/capability tests plus an offline end-to-end smoke run
-make eval    # run tasks with hidden-test grading: resolve rate, false-VERIFIED rate, tokens, time
+make eval TASKS=/path/to/tasks.json  # optional local task set with hidden-test grading
 ```
 
 Only the Python standard library (3.9+) and `git` are needed, so `make setup` cannot fail on a download. `ripgrep` is used when present.
 
 ## Model configuration
 
-The model is defined in the **MODEL CONFIGURATION** block of `config/harness.toml`: `[model].name`, or `AI_MODEL` to override it. Some providers have a default; OpenRouter and Qwen require an explicit model ID. Set the exact evaluator model ID. The effective model is printed at startup and recorded in every `result.json`.
+The model is defined in the **MODEL CONFIGURATION** block of `configuration-files/harness.toml`: `[model].name`, or `AI_MODEL` to override it. Some providers have a default; OpenRouter and Qwen require an explicit model ID. Set the exact evaluator model ID. The effective model is printed at startup and recorded in every `result.json`.
 
 For local Groq GPT-OSS 120B testing, export your Groq key as `AI_API_KEY` and run:
 
@@ -179,8 +179,10 @@ Flaky tests are re-run and excluded. A new collection error counts as a regressi
 ## Repository layout
 
 ```
-Makefile  config/harness.toml  .env.example  pyproject.toml  README.md  CLAUDE.md
-harness/
+Makefile  README.md  pyproject.toml
+configuration-files/  harness.toml · profiles/ · .env.example (sample only)
+dependency-files/     requirements.txt (standard-library runtime)
+source-code/harness/
   cli.py          task input: interactive session, headless flags/env, piped text or JSON
   controller/     controller.py (phases, budgets, recovery, self-review) · protocol.py (tools) ·
                   prompts.py · loopguard.py · state.py
@@ -189,19 +191,19 @@ harness/
   verify/         testrun.py (framework detection, parsers) · verifier.py · ledger.py
   provider/       anthropic.py · openai_compat.py · http.py · scripted.py
   memory/ skills.py telemetry.py workspace.py (private snapshot repo, base swaps) eval.py
-skills/           8 procedure files loaded on demand
+source-code/skills/  8 procedure.txt files loaded on demand
 tests/            test_core.py · test_features.py · test_providers_http.py · test_review_regressions.py
-eval/             tasks.json + runner output
-docs/fix_plan.md  experiment backlog
 ```
+
+Local design notes, research Markdown, and benchmark fixtures are excluded from Git. The evaluator clone contains the code, runtime procedures, configuration, dependency manifest, and tests.
 
 ## Improving it
 
-1. Run `make eval` on a task set with hidden tests.
+1. Run `make eval TASKS=/path/to/tasks.json` on a task set with hidden tests.
 2. Read the transcripts in `runs/*/trace.jsonl`.
 3. Change one thing, run `make test`, then re-evaluate on the same tasks.
 4. Keep the change only if resolution rises at acceptable cost, or cost falls at equal resolution, and the false-VERIFIED rate stays at or below 10%.
 
 ## Prior art
 
-This harness is our own design and implementation. We studied public work on software-engineering agents (SWE-bench grading methodology, agent-computer interface research, repository maps and open-source coding agents) and the research papers listed in `RESOURCES.md`, and credit them for the ideas they explore.
+This harness is our own design and implementation. We studied public work on software-engineering agents, including SWE-bench grading methodology, agent-computer interface research, repository maps, and open-source coding agents. Detailed research notes are kept outside the evaluator clone.
